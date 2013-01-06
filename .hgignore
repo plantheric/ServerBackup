@@ -2,3 +2,4 @@ syntax: glob
 Backup/bin/
 Backup/obj/
 Backup.v11.suo
+Backup/Backup.csproj.user
