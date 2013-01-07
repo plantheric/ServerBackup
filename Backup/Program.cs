@@ -22,6 +22,17 @@ namespace nopBackup
             };
             files.Add(backup.MakeBackupFile());
 
+            var archiveFiles = new ArchiveFiles
+            {
+                LocalDirectory = ConfigurationManager.AppSettings["ImagesDirectory"],
+                AWSBucket = ConfigurationManager.AppSettings["AWSBucket"],
+                AWSAccessKey = ConfigurationManager.AppSettings["AWSAccessKey"],
+                AWSSecretKey = ConfigurationManager.AppSettings["AWSSecretKey"],
+                BaseKeyPrefix = ConfigurationManager.AppSettings["AWSKeyPrefix"],
+                SubKeyPrefix = @"Images"
+            };
+            files.AddRange(archiveFiles.GetFilesToUpload());
+
             var upload = new Upload
             {
                 Bucket = ConfigurationManager.AppSettings["AWSBucket"],
