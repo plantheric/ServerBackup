@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,8 +13,9 @@ namespace nopBackup
     {
         static void Main(string[] args)
         {
+            var files = new List<string>();
             var backup = new BackupDatabase { ServerName = @".\SQLExpress", DatabaseName = "nopcommerce497" };
-            backup.MakeBackupFile();
+            files.Add(backup.MakeBackupFile());
         }
     }
 }

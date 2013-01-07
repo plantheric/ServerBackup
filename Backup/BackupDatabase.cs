@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,22 +18,29 @@ namespace nopBackup
 
         public string MakeBackupFile()
         {
-            FilePath = @"c:\Users\Public\backup.bak";
             var server = new Server(ServerName);
+            string backupName = string.Format("{0}-Backup-{1}", DatabaseName, DateTime.Now.ToString("ddMMyyy_HHmm"));
 
-            var backup = new Backup ();
+            FilePath = Path.Combine(Utilities.SystemTempFolder, backupName + ".bak");
+
+            var backup = new Backup();
             backup.Action = BackupActionType.Database;
             backup.Database = DatabaseName;
             backup.Devices.AddDevice(FilePath, DeviceType.File);
-            backup.BackupSetName = DatabaseName + "-Backup";
-            backup.BackupSetDescription = "Backup";
+            backup.BackupSetName = backupName;
+            backup.BackupSetDescription = string.Format("Backup for database {0} from server {1}", DatabaseName, server.Name); ;
             backup.Initialize = true;
             backup.PercentComplete += backup_PercentComplete;
             backup.Complete += backup_Complete;
+
             backup.SqlBackup(server);
+            string zipFilePath = Utilities.MakeZipFile(FilePath);
+            File.Delete(FilePath);
+            FilePath = zipFilePath;
 
             return FilePath;
         }
+
 
         static void backup_Complete(object sender, ServerMessageEventArgs e)
         {
@@ -46,6 +54,7 @@ namespace nopBackup
 
         public string DatabaseName { get; set; }
         public string ServerName { get; set; }
+
         private string FilePath { get; set; }
     }
 }
