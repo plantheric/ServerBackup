@@ -39,7 +39,7 @@ namespace nopBackup
             File.Delete(FilePath);
             FilePath = zipFilePath;
 
-            return new UploadItem { FilePaths = new List<string> {FilePath}, KeyPrefix = "Database", Lifetime = TimeSpan.MaxValue };
+            return new UploadItem { FilePaths = new List<string> { FilePath }, KeyPrefix = "Database", Lifetime = TimeSpan.FromDays(10) };
         }
 
 
