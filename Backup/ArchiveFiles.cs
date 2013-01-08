@@ -11,14 +11,12 @@ namespace nopBackup
 {
     class ArchiveFiles
     {
-        public UploadItem GetFilesToUpload()
+        public List<string> GetFilesToUpload()
         {
-            string fullPrefix = string.Format("{0}/{1}/", BaseKeyPrefix, SubKeyPrefix);
-
             List<string> localFiles = new List<string>(Directory.GetFiles(LocalDirectory));
             localFiles = localFiles.ConvertAll(f => Path.GetFileName(f));
 
-            var request = new ListObjectsRequest { BucketName = AWSBucket, Prefix = fullPrefix, Delimiter = @"/" };
+            var request = new ListObjectsRequest { BucketName = AWSBucket, Prefix = FullKeyPrefix, Delimiter = @"/" };
 
             List<string> s3Files;
 
@@ -26,21 +24,20 @@ namespace nopBackup
             {
                 using (var response = s3Client.ListObjects(request))
                 {
-                    s3Files = response.S3Objects.ConvertAll(f => f.Key.Substring(fullPrefix.Length));
+                    s3Files = response.S3Objects.ConvertAll(f => f.Key.Substring(FullKeyPrefix.Length));
                 }
             }
 
             localFiles = new List<string>(localFiles.Except(s3Files));
             localFiles = localFiles.ConvertAll(f => Path.Combine(LocalDirectory, f));
 
-            return new UploadItem { FilePaths = localFiles, KeyPrefix = SubKeyPrefix, Lifetime = TimeSpan.MaxValue };
+            return localFiles;
         }
 
         public string LocalDirectory;
         public string AWSAccessKey;
         public string AWSSecretKey;
         public string AWSBucket;
-        public string BaseKeyPrefix;
-        public string SubKeyPrefix;
+        public string FullKeyPrefix;
     }
 }

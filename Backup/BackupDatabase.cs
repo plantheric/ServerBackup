@@ -16,7 +16,7 @@ namespace nopBackup
         {
         }
 
-        public UploadItem MakeBackupFile()
+        public List<string> MakeBackupFile()
         {
             var server = new Server(ServerName);
             string backupName = string.Format("{0}-Backup-{1}", DatabaseName, DateTime.Now.ToString("ddMMyyy_HHmm"));
@@ -39,7 +39,7 @@ namespace nopBackup
             File.Delete(FilePath);
             FilePath = zipFilePath;
 
-            return new UploadItem { FilePaths = new List<string> { FilePath }, KeyPrefix = KeyPrefix, Lifetime = TimeSpan.FromDays(10) };
+            return new List<string> { FilePath };
         }
 
 
@@ -55,7 +55,6 @@ namespace nopBackup
 
         public string DatabaseName { get; set; }
         public string ServerName { get; set; }
-        public string KeyPrefix { get; set; }
 
         private string FilePath { get; set; }
     }

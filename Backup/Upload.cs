@@ -15,7 +15,7 @@ namespace nopBackup
     {
         public List<string> FilePaths;
         public string KeyPrefix;
-        public TimeSpan Lifetime;
+        public int Lifetime;
     }
 
     class Upload
@@ -36,13 +36,13 @@ namespace nopBackup
                 }
 
                 LifecycleConfiguration.Rules.RemoveAll(rule => rule.Prefix == fullPrefix);
-                if (upload.Lifetime != TimeSpan.MaxValue)
+                if (upload.Lifetime != int.MaxValue)
                 {
                     LifecycleConfiguration.Rules.Add(new LifecycleRule
                     {
-                        Id = string.Format("Auto Purge {0} after {1} days", fullPrefix, upload.Lifetime.Days),
+                        Id = string.Format("Auto Purge {0} after {1} days", fullPrefix, upload.Lifetime),
                         Prefix = fullPrefix,
-                        Expiration = new LifecycleRuleExpiration { Days = upload.Lifetime.Days }
+                        Expiration = new LifecycleRuleExpiration { Days = upload.Lifetime }
                     });
                 }
             }

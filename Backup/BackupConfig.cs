@@ -1,4 +1,5 @@
-﻿using System.Configuration;
+﻿using System;
+using System.Configuration;
 
 namespace nopBackup
 {
@@ -76,6 +77,12 @@ namespace nopBackup
         public string KeyPrefix
         {
             get { return this["KeyPrefix"] as string; }
+        }
+
+        [ConfigurationProperty("Lifetime", DefaultValue = int.MaxValue)]
+        public int Lifetime
+        {
+            get { return (int)this["Lifetime"]; }
         }
     }
 
