@@ -11,32 +11,34 @@ namespace nopBackup
 {
     class UploadItem
     {
-        public string FilePath;
+        public List<string> FilePaths;
         public string KeyPrefix;
         public TimeSpan Lifetime;
     }
 
     class Upload
     {
-        public bool TransferFiles(List<UploadItem> files)
+        public bool TransferFiles(List<UploadItem> uploads)
         {
-            var s3Client = AWSClientFactory.CreateAmazonS3Client(AccessKey, SecretKey);
+            var s3Client = AWSClientFactory.CreateAmazonS3Client(AWSAccessKey, AWSSecretKey);
             var tranferUtility = new TransferUtility(s3Client);
 
-            foreach (UploadItem file in files)
+            foreach (var upload in uploads)
             {
-                string fileKey = string.Join("/", new[] { KeyPrefix, file.KeyPrefix, Path.GetFileName(file.FilePath) });
-                var request = new TransferUtilityUploadRequest().WithBucketName(Bucket).WithKey(fileKey).WithFilePath(file.FilePath);
+                foreach (string file in upload.FilePaths)
+                {
+                    string fileKey = string.Join("/", new[] { KeyPrefix, upload.KeyPrefix, Path.GetFileName(file) });
+                    var request = new TransferUtilityUploadRequest { BucketName = AWSBucket, Key = fileKey, FilePath = file };
 
-                tranferUtility.Upload(request);
+                    tranferUtility.Upload(request);
+                }
             }
-
             return true;
         }
 
-        public string AccessKey;
-        public string SecretKey;
+        public string AWSAccessKey;
+        public string AWSSecretKey;
+        public string AWSBucket;
         public string KeyPrefix;
-        public string Bucket;
     }
 }

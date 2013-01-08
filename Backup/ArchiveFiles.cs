@@ -11,7 +11,7 @@ namespace nopBackup
 {
     class ArchiveFiles
     {
-        public List<UploadItem> GetFilesToUpload()
+        public UploadItem GetFilesToUpload()
         {
             string fullPrefix = string.Format("{0}/{1}/", BaseKeyPrefix, SubKeyPrefix);
 
@@ -33,13 +33,7 @@ namespace nopBackup
             localFiles = new List<string>(localFiles.Except(s3Files));
             localFiles = localFiles.ConvertAll(f => Path.Combine(LocalDirectory, f));
 
-            var filesToUpload = localFiles.ConvertAll(f => new UploadItem
-                                                            {
-                                                                FilePath = f,
-                                                                KeyPrefix = SubKeyPrefix,
-                                                                Lifetime = TimeSpan.MaxValue
-                                                            });
-            return filesToUpload;
+            return new UploadItem { FilePaths = localFiles, KeyPrefix = SubKeyPrefix, Lifetime = TimeSpan.MaxValue };
         }
 
         public string LocalDirectory;

@@ -31,13 +31,13 @@ namespace nopBackup
                 BaseKeyPrefix = ConfigurationManager.AppSettings["AWSKeyPrefix"],
                 SubKeyPrefix = @"Images"
             };
-            files.AddRange(archiveFiles.GetFilesToUpload());
+            files.Add(archiveFiles.GetFilesToUpload());
 
             var upload = new Upload
             {
-                Bucket = ConfigurationManager.AppSettings["AWSBucket"],
-                AccessKey = ConfigurationManager.AppSettings["AWSAccessKey"],
-                SecretKey = ConfigurationManager.AppSettings["AWSSecretKey"],
+                AWSBucket = ConfigurationManager.AppSettings["AWSBucket"],
+                AWSAccessKey = ConfigurationManager.AppSettings["AWSAccessKey"],
+                AWSSecretKey = ConfigurationManager.AppSettings["AWSSecretKey"],
                 KeyPrefix = ConfigurationManager.AppSettings["AWSKeyPrefix"]
             };
 

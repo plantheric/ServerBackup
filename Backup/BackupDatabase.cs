@@ -32,13 +32,14 @@ namespace nopBackup
             backup.Initialize = true;
             backup.PercentComplete += backup_PercentComplete;
             backup.Complete += backup_Complete;
+            backup.Incremental = true;
 
             backup.SqlBackup(server);
             string zipFilePath = Utilities.MakeZipFile(FilePath);
             File.Delete(FilePath);
             FilePath = zipFilePath;
 
-            return new UploadItem { FilePath = FilePath, KeyPrefix = "Database", Lifetime = TimeSpan.MaxValue };
+            return new UploadItem { FilePaths = new List<string> {FilePath}, KeyPrefix = "Database", Lifetime = TimeSpan.MaxValue };
         }
 
 
