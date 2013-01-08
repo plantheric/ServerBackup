@@ -14,31 +14,34 @@ namespace nopBackup
     {
         static void Main(string[] args)
         {
+            BackupConfig config = BackupConfig.GetConfig();
+            
             var files = new List<UploadItem>();
             var backup = new BackupDatabase
             {
-                ServerName = ConfigurationManager.AppSettings["SQLServerName"],
-                DatabaseName = ConfigurationManager.AppSettings["SQLDatabaseName"]
+                ServerName = config.Database.Server,
+                DatabaseName = config.Database.Name,
+                KeyPrefix = config.Database.KeyPrefix
             };
             files.Add(backup.MakeBackupFile());
 
             var archiveFiles = new ArchiveFiles
             {
-                LocalDirectory = ConfigurationManager.AppSettings["ImagesDirectory"],
-                AWSBucket = ConfigurationManager.AppSettings["AWSBucket"],
-                AWSAccessKey = ConfigurationManager.AppSettings["AWSAccessKey"],
-                AWSSecretKey = ConfigurationManager.AppSettings["AWSSecretKey"],
-                BaseKeyPrefix = ConfigurationManager.AppSettings["AWSKeyPrefix"],
-                SubKeyPrefix = @"Images"
+                LocalDirectory = config.Directory.Path,
+                AWSBucket = config.Bucket,
+                AWSAccessKey = config.AccessKey,
+                AWSSecretKey = config.SecretKey,
+                BaseKeyPrefix = config.KeyPrefix,
+                SubKeyPrefix = config.Directory.KeyPrefix
             };
             files.Add(archiveFiles.GetFilesToUpload());
 
             var upload = new Upload
             {
-                AWSBucket = ConfigurationManager.AppSettings["AWSBucket"],
-                AWSAccessKey = ConfigurationManager.AppSettings["AWSAccessKey"],
-                AWSSecretKey = ConfigurationManager.AppSettings["AWSSecretKey"],
-                KeyPrefix = ConfigurationManager.AppSettings["AWSKeyPrefix"]
+                AWSBucket = config.Bucket,
+                AWSAccessKey = config.AccessKey,
+                AWSSecretKey = config.SecretKey,
+                KeyPrefix = config.KeyPrefix
             };
 
             upload.TransferFiles(files);
