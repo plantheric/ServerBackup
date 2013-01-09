@@ -34,17 +34,18 @@ namespace nopBackup
             get { return this["KeyPrefix"] as string; }
         }
 
-        [ConfigurationProperty("Database")]
-        public DatabaseBackup Database
+        [ConfigurationProperty("Databases")]
+        [ConfigurationCollection(typeof(ConfigCollection<DatabaseBackup>), AddItemName = "Database")]
+        public ConfigCollection<DatabaseBackup> Databases
         {
-            get { return this["Database"] as DatabaseBackup; }
+            get { return this["Databases"] as ConfigCollection<DatabaseBackup>; }
         }
 
         [ConfigurationProperty("Directories")]
-        [ConfigurationCollection(typeof(DirectoriesBackup), AddItemName="Directory")]
-        public DirectoriesBackup Directories
+        [ConfigurationCollection(typeof(ConfigCollection<DirectoryBackup>), AddItemName = "Directory")]
+        public ConfigCollection<DirectoryBackup> Directories
         {
-            get { return this["Directories"] as DirectoriesBackup; }
+            get { return this["Directories"] as ConfigCollection<DirectoryBackup>; }
         }
 
         public string FullKeyPrefix(string subKeyPrefix)
@@ -53,21 +54,21 @@ namespace nopBackup
         }
     }
 
-    public class DirectoriesBackup : ConfigurationElementCollection
+    public class ConfigCollection<T> : ConfigurationElementCollection where T : BackupTarget, new() 
     {
-        public DirectoryBackup this[int index]
+        public T this[int index]
         {
-            get { return base.BaseGet(index) as DirectoryBackup; }
+            get { return base.BaseGet(index) as T; }
         }
 
         protected override ConfigurationElement CreateNewElement()
         {
-            return new DirectoryBackup();
+            return new T();
         }
 
         protected override object GetElementKey(ConfigurationElement element)
         {
-            return ((DirectoryBackup)element).KeyPrefix;
+            return ((T)element).KeyPrefix;
         }
     }
 

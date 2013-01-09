@@ -18,18 +18,20 @@ namespace nopBackup
 
             var files = new List<UploadItem>();
 
-            var backup = new BackupDatabase
+            foreach (DatabaseBackup database in config.Databases)
             {
-                ServerName = config.Database.Server,
-                DatabaseName = config.Database.Name
-            };
-            files.Add(new UploadItem
-                        {
-                            FilePaths = backup.MakeBackupFile(),
-                            KeyPrefix = config.Database.KeyPrefix,
-                            Lifetime = config.Database.Lifetime
-                        });
-
+                var backup = new BackupDatabase
+                {
+                    ServerName = database.Server,
+                    DatabaseName = database.Name
+                };
+                files.Add(new UploadItem
+                            {
+                                FilePaths = backup.MakeBackupFile(),
+                                KeyPrefix = database.KeyPrefix,
+                                Lifetime = database.Lifetime
+                            });
+            }
 
             foreach (DirectoryBackup directory in config.Directories)
             {
