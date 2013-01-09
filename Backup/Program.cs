@@ -17,6 +17,7 @@ namespace nopBackup
             BackupConfig config = BackupConfig.GetConfig();
 
             var files = new List<UploadItem>();
+
             var backup = new BackupDatabase
             {
                 ServerName = config.Database.Server,
@@ -29,21 +30,25 @@ namespace nopBackup
                             Lifetime = config.Database.Lifetime
                         });
 
-            var archiveFiles = new ArchiveFiles
-            {
-                LocalDirectory = config.Directory.Path,
-                AWSBucket = config.Bucket,
-                AWSAccessKey = config.AccessKey,
-                AWSSecretKey = config.SecretKey,
-                FullKeyPrefix = config.KeyPrefix + @"/" + config.Directory.KeyPrefix + @"/"
-            };
-            files.Add(new UploadItem
-                        {
-                            FilePaths = archiveFiles.GetFilesToUpload(),
-                            KeyPrefix = config.Directory.KeyPrefix,
-                            Lifetime = config.Directory.Lifetime
-                        });
 
+            foreach (DirectoryBackup directory in config.Directories)
+            {
+                var archiveFiles = new ArchiveFiles
+                {
+                    LocalDirectory = directory.Path,
+                    AWSBucket = config.Bucket,
+                    AWSAccessKey = config.AccessKey,
+                    AWSSecretKey = config.SecretKey,
+                    FullKeyPrefix = config.FullKeyPrefix(directory.KeyPrefix)
+                };
+                files.Add(new UploadItem
+                            {
+                                FilePaths = archiveFiles.GetFilesToUpload(),
+                                KeyPrefix = directory.KeyPrefix,
+                                Lifetime = directory.Lifetime
+                            });
+            }
+            
             var upload = new Upload
             {
                 AWSBucket = config.Bucket,

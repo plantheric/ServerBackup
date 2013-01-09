@@ -40,10 +40,34 @@ namespace nopBackup
             get { return this["Database"] as DatabaseBackup; }
         }
 
-        [ConfigurationProperty("Directory")]
-        public DirectoryBackup Directory
+        [ConfigurationProperty("Directories")]
+        [ConfigurationCollection(typeof(DirectoriesBackup), AddItemName="Directory")]
+        public DirectoriesBackup Directories
         {
-            get { return this["Directory"] as DirectoryBackup; }
+            get { return this["Directories"] as DirectoriesBackup; }
+        }
+
+        public string FullKeyPrefix(string subKeyPrefix)
+        {
+            return KeyPrefix + @"/" + subKeyPrefix + @"/";
+        }
+    }
+
+    public class DirectoriesBackup : ConfigurationElementCollection
+    {
+        public DirectoryBackup this[int index]
+        {
+            get { return base.BaseGet(index) as DirectoryBackup; }
+        }
+
+        protected override ConfigurationElement CreateNewElement()
+        {
+            return new DirectoryBackup();
+        }
+
+        protected override object GetElementKey(ConfigurationElement element)
+        {
+            return ((DirectoryBackup)element).KeyPrefix;
         }
     }
 
