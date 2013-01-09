@@ -7,14 +7,20 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Common;
+using log4net;
+using log4net.Config;
 
 namespace nopBackup
 {
     class Program
     {
+        private static readonly ILog log = LogManager.GetLogger(typeof(Program));
         static void Main(string[] args)
         {
+            XmlConfigurator.Configure();
             BackupConfig config = BackupConfig.GetConfig();
+
+            log.Info("Start");
 
             var files = new List<UploadItem>();
 
@@ -50,6 +56,7 @@ namespace nopBackup
             };
 
             upload.TransferFiles(files);
+            log.Info("End");
         }
     }
 }
