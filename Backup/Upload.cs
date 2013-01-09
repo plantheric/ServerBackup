@@ -13,6 +13,12 @@ namespace nopBackup
 {
     class UploadItem
     {
+        public UploadItem(List<string> files, string keyPrefix, int lifetime)
+        {
+            FilePaths = files;
+            KeyPrefix = keyPrefix;
+            Lifetime = lifetime;
+        }
         public List<string> FilePaths;
         public string KeyPrefix;
         public int Lifetime;
