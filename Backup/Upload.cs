@@ -8,6 +8,7 @@ using Amazon;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
+using log4net;
 
 namespace nopBackup
 {
@@ -28,31 +29,43 @@ namespace nopBackup
     {
         public bool TransferFiles(List<UploadItem> uploads)
         {
-            S3Client = AWSClientFactory.CreateAmazonS3Client(AWSAccessKey, AWSSecretKey);
-            GetLifeCycleConfiguration();
-            var tranferUtility = new TransferUtility(S3Client);
-
-            foreach (var upload in uploads)
+            try
             {
-                string fullPrefix = KeyPrefix + @"/" + upload.KeyPrefix;
-                foreach (string file in upload.FilePaths)
-                {
-                    string fileKey = fullPrefix + @"/" + Path.GetFileName(file);
-                    tranferUtility.Upload(file, AWSBucket, fileKey);
-                }
+                log.Info("Start TransferFiles");
 
-                LifecycleConfiguration.Rules.RemoveAll(rule => rule.Prefix == fullPrefix);
-                if (upload.Lifetime != int.MaxValue)
+                S3Client = AWSClientFactory.CreateAmazonS3Client(AWSAccessKey, AWSSecretKey);
+                GetLifeCycleConfiguration();
+                var tranferUtility = new TransferUtility(S3Client);
+
+                foreach (var upload in uploads)
                 {
-                    LifecycleConfiguration.Rules.Add(new LifecycleRule
+                    string fullPrefix = KeyPrefix + @"/" + upload.KeyPrefix;
+                    foreach (string file in upload.FilePaths)
                     {
-                        Id = string.Format("Auto Purge {0} after {1} days", fullPrefix, upload.Lifetime),
-                        Prefix = fullPrefix,
-                        Expiration = new LifecycleRuleExpiration { Days = upload.Lifetime }
-                    });
+                        string fileKey = fullPrefix + @"/" + Path.GetFileName(file);
+                        tranferUtility.Upload(file, AWSBucket, fileKey);
+
+                        log.InfoFormat("Uploaded {0}", fileKey);
+                    }
+
+                    LifecycleConfiguration.Rules.RemoveAll(rule => rule.Prefix == fullPrefix);
+                    if (upload.Lifetime != int.MaxValue)
+                    {
+                        LifecycleConfiguration.Rules.Add(new LifecycleRule
+                        {
+                            Id = string.Format("Auto Purge {0} after {1} days", fullPrefix, upload.Lifetime),
+                            Prefix = fullPrefix,
+                            Expiration = new LifecycleRuleExpiration { Days = upload.Lifetime }
+                        });
+                    }
                 }
+                PutLifeCycleConfiguration();
             }
-            PutLifeCycleConfiguration();
+            catch (Exception e)
+            {
+                log.Error("TransferFiles error", e);
+            }
+            log.Info("End TransferFiles");
             return true;
         }
 
@@ -80,5 +93,7 @@ namespace nopBackup
 
         private AmazonS3 S3Client;
         private LifecycleConfiguration LifecycleConfiguration;
+
+        private static readonly ILog log = LogManager.GetLogger(typeof(Upload));
     }
 }

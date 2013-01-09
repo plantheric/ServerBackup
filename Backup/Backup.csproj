@@ -89,6 +89,7 @@
     <None Include="packages.config" />
     <None Include="Backup.config">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <SubType>Designer</SubType>
     </None>
   </ItemGroup>
   <ItemGroup>
