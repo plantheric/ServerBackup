@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -7,6 +8,7 @@ using System.Threading.Tasks;
 using Microsoft.SqlServer.Management.Smo;
 using Microsoft.SqlServer.Management.Common;
 using System.IO.Compression;
+using Amazon.S3.Model;
 using log4net;
 
 namespace nopBackup
@@ -37,7 +39,7 @@ namespace nopBackup
                 backup.Initialize = true;
                 backup.PercentComplete += backup_PercentComplete;
                 backup.Complete += backup_Complete;
-                backup.Incremental = true;
+                backup.Incremental = IsIncrementalBackup();
 
                 backup.SqlBackup(server);
                 string zipFilePath = Utilities.MakeZipFile(FilePath);
@@ -54,6 +56,18 @@ namespace nopBackup
             return new List<string> { FilePath };
         }
 
+        private bool IsIncrementalBackup()
+        {
+            var s3Interface = new S3Interface();
+            List<S3Object> s3Objects = s3Interface.ObjectsFromKey(FullKeyPrefix);
+
+            s3Objects.Sort((a, b) => a.LastModified.CompareTo(b.LastModified));
+            s3Objects = s3Objects.GetRange(s3Objects.Count - FullBackupPeriod, FullBackupPeriod);
+
+            var metadata =  s3Interface.GetObjectMetadata(s3Objects);
+
+            return true;
+           }
 
         static void backup_Complete(object sender, ServerMessageEventArgs e)
         {
@@ -63,8 +77,10 @@ namespace nopBackup
         {
         }
 
-        public string DatabaseName { get; set; }
-        public string ServerName { get; set; }
+        public string DatabaseName;
+        public string ServerName;
+        public string FullKeyPrefix;
+        public int FullBackupPeriod = 2;
 
         private string FilePath { get; set; }
         private static readonly ILog log = LogManager.GetLogger(typeof(BackupDatabase));

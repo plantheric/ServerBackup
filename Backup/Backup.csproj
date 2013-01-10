@@ -76,6 +76,7 @@
     <Compile Include="BackupConfig.cs" />
     <Compile Include="BackupDatabase.cs" />
     <Compile Include="ArchiveFiles.cs" />
+    <Compile Include="S3Interface.cs" />
     <Compile Include="Upload.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

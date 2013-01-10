@@ -18,9 +18,10 @@ namespace nopBackup
         static void Main(string[] args)
         {
             XmlConfigurator.Configure();
-            BackupConfig config = BackupConfig.GetConfig();
-
             log.Info("Start");
+
+            BackupConfig config = BackupConfig.GetConfig();
+            S3Interface.Setup(config.AccessKey, config.SecretKey, config.Bucket);
 
             var files = new List<UploadItem>();
 
@@ -29,7 +30,8 @@ namespace nopBackup
                 var backup = new BackupDatabase
                 {
                     ServerName = database.Server,
-                    DatabaseName = database.Name
+                    DatabaseName = database.Name,
+                    FullKeyPrefix = config.FullKeyPrefix(database.KeyPrefix)
                 };
                 files.Add(new UploadItem(backup.MakeBackupFile(), database.KeyPrefix, database.Lifetime));
             }
@@ -39,9 +41,6 @@ namespace nopBackup
                 var archiveFiles = new ArchiveFiles
                 {
                     LocalDirectory = directory.Path,
-                    AWSBucket = config.Bucket,
-                    AWSAccessKey = config.AccessKey,
-                    AWSSecretKey = config.SecretKey,
                     FullKeyPrefix = config.FullKeyPrefix(directory.KeyPrefix)
                 };
                 files.Add(new UploadItem(archiveFiles.GetFilesToUpload(), directory.KeyPrefix, directory.Lifetime));
