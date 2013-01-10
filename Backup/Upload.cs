@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -14,20 +15,26 @@ namespace nopBackup
 {
     class UploadItem
     {
-        public UploadItem(List<string> files, string keyPrefix, int lifetime)
+        public string FilePath;
+        public NameValueCollection Metadata;
+    }
+
+    class UploadSet
+    {
+        public UploadSet(List<UploadItem> items, string keyPrefix, int lifetime)
         {
-            FilePaths = files;
+            Items = items;
             KeyPrefix = keyPrefix;
             Lifetime = lifetime;
         }
-        public List<string> FilePaths;
+        public List<UploadItem> Items;
         public string KeyPrefix;
         public int Lifetime;
     }
 
     class Upload
     {
-        public bool TransferFiles(List<UploadItem> uploads)
+        public bool TransferFiles(List<UploadSet> uploads)
         {
             try
             {
@@ -40,10 +47,10 @@ namespace nopBackup
                 foreach (var upload in uploads)
                 {
                     string fullPrefix = KeyPrefix + @"/" + upload.KeyPrefix;
-                    foreach (string file in upload.FilePaths)
+                    foreach (var file in upload.Items)
                     {
-                        string fileKey = fullPrefix + @"/" + Path.GetFileName(file);
-                        tranferUtility.Upload(file, AWSBucket, fileKey);
+                        string fileKey = fullPrefix + @"/" + Path.GetFileName(file.FilePath);
+                        tranferUtility.Upload(file.FilePath, AWSBucket, fileKey);
 
                         log.InfoFormat("Uploaded {0}", fileKey);
                     }

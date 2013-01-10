@@ -12,9 +12,9 @@ namespace nopBackup
 {
     class ArchiveFiles
     {
-        public List<string> GetFilesToUpload()
+        public List<UploadItem> GetFilesToUpload()
         {
-            List<string> localFiles = new List<string>();
+            var localFiles = new List<string>();
             try
             {
                 log.InfoFormat("Start GetFilesToUpload for {0}", LocalDirectory);
@@ -35,7 +35,7 @@ namespace nopBackup
 
             log.InfoFormat("End GetFilesToUpload found {0}", localFiles.Count);
 
-            return localFiles;
+            return localFiles.ConvertAll(f => new UploadItem { FilePath = f });
         }
 
         public string LocalDirectory;

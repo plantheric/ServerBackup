@@ -23,7 +23,7 @@ namespace nopBackup
             BackupConfig config = BackupConfig.GetConfig();
             S3Interface.Setup(config.AccessKey, config.SecretKey, config.Bucket);
 
-            var files = new List<UploadItem>();
+            var files = new List<UploadSet>();
 
             foreach (DatabaseBackup database in config.Databases)
             {
@@ -33,7 +33,7 @@ namespace nopBackup
                     DatabaseName = database.Name,
                     FullKeyPrefix = config.FullKeyPrefix(database.KeyPrefix)
                 };
-                files.Add(new UploadItem(backup.MakeBackupFile(), database.KeyPrefix, database.Lifetime));
+                files.Add(new UploadSet(backup.MakeBackupFile(), database.KeyPrefix, database.Lifetime));
             }
 
             foreach (DirectoryBackup directory in config.Directories)
@@ -43,7 +43,7 @@ namespace nopBackup
                     LocalDirectory = directory.Path,
                     FullKeyPrefix = config.FullKeyPrefix(directory.KeyPrefix)
                 };
-                files.Add(new UploadItem(archiveFiles.GetFilesToUpload(), directory.KeyPrefix, directory.Lifetime));
+                files.Add(new UploadSet(archiveFiles.GetFilesToUpload(), directory.KeyPrefix, directory.Lifetime));
             }
 
             var upload = new Upload

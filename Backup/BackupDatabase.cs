@@ -19,7 +19,7 @@ namespace nopBackup
         {
         }
 
-        public List<string> MakeBackupFile()
+        public List<UploadItem> MakeBackupFile()
         {
             try
             {
@@ -53,7 +53,7 @@ namespace nopBackup
 
             log.Info("End backup");
 
-            return new List<string> { FilePath };
+            return new List<UploadItem> { new UploadItem { FilePath = FilePath } };
         }
 
         private bool IsIncrementalBackup()
@@ -64,10 +64,10 @@ namespace nopBackup
             s3Objects.Sort((a, b) => a.LastModified.CompareTo(b.LastModified));
             s3Objects = s3Objects.GetRange(s3Objects.Count - FullBackupPeriod, FullBackupPeriod);
 
-            var metadata =  s3Interface.GetObjectMetadata(s3Objects);
+            var metadata = s3Interface.GetObjectMetadata(s3Objects);
 
             return true;
-           }
+        }
 
         static void backup_Complete(object sender, ServerMessageEventArgs e)
         {
