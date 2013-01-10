@@ -41,7 +41,7 @@ namespace nopBackup
                 backup.Initialize = true;
                 backup.PercentComplete += backup_PercentComplete;
                 backup.Complete += backup_Complete;
-                backup.Incremental = IsIncrementalBackup();
+                backup.Incremental = NeedIncrementalBackup();
 
                 backup.SqlBackup(server);
                 string zipFilePath = Utilities.MakeZipFile(FilePath);
@@ -49,7 +49,7 @@ namespace nopBackup
                 FilePath = zipFilePath;
 
                 var metadata = new NameValueCollection();
-                metadata.Add("BackupType", backup.Incremental ? "Differential" : "Full");
+                metadata.Add("backuptype", backup.Incremental ? "Differential" : "Full");
 
                 uploads.Add(new UploadItem { FilePath = FilePath, Metadata = metadata });
             }
@@ -63,7 +63,9 @@ namespace nopBackup
             return uploads;
         }
 
-        private bool IsIncrementalBackup()
+        //  Checks the metadata of the last $FullBackupFrequency backsup, if none were a 
+        //  full backup then we need to do one.
+        private bool NeedIncrementalBackup()
         {
             var s3Interface = new S3Interface();
             List<S3Object> s3Objects = s3Interface.ObjectsFromKey(FullKeyPrefix);
@@ -71,10 +73,10 @@ namespace nopBackup
             s3Objects.Sort((a, b) => DateTime.Parse(a.LastModified).CompareTo(DateTime.Parse(b.LastModified)));
             s3Objects = s3Objects.GetRange(s3Objects.Count - FullBackupFrequency, FullBackupFrequency);
 
-            var metadata = s3Interface.GetObjectMetadata(s3Objects);
+            List<NameValueCollection> metadata = s3Interface.GetObjectMetadata(s3Objects);
 
-            bool recentFull = metadata.Exists(md => md.Get("x-amz-meta-backuptype") == "Full");
-            return recentFull;
+            bool recentFullBackup = metadata.Exists(md => md.Get("x-amz-meta-backuptype") == "Full");
+            return recentFullBackup;
         }
 
         static void backup_Complete(object sender, ServerMessageEventArgs e)

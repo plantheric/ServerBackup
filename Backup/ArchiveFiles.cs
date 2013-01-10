@@ -14,28 +14,28 @@ namespace nopBackup
     {
         public List<UploadItem> GetFilesToUpload()
         {
-            var localFiles = new List<string>();
+            var uploads = new List<UploadItem>();
             try
             {
                 log.InfoFormat("Start GetFilesToUpload for {0}", LocalDirectory);
 
-                localFiles = new List<string>(Directory.GetFiles(LocalDirectory));
-                localFiles = localFiles.ConvertAll(f => Path.GetFileName(f));
+                var localNames = new List<string>(Directory.GetFiles(LocalDirectory)).ConvertAll(f => Path.GetFileName(f));
 
-                List<S3Object> s3Objects = new S3Interface().ObjectsFromKey(FullKeyPrefix);
-                List<string> s3Files = s3Objects.ConvertAll(f => f.Key.Substring(FullKeyPrefix.Length));
+                var s3Objects = new S3Interface().ObjectsFromKey(FullKeyPrefix);
+                var remoteNames = s3Objects.ConvertAll(f => f.Key.Substring(FullKeyPrefix.Length));
 
-                localFiles = new List<string>(localFiles.Except(s3Files));
-                localFiles = localFiles.ConvertAll(f => Path.Combine(LocalDirectory, f));
+                var newNames = new List<string>(localNames.Except(remoteNames));
+
+                uploads = newNames.ConvertAll(fn => new UploadItem { FilePath = Path.Combine(LocalDirectory, fn) });
             }
             catch (Exception e)
             {
                 log.Error("GetFilesToUpload error", e);
             }
 
-            log.InfoFormat("End GetFilesToUpload found {0}", localFiles.Count);
+            log.InfoFormat("End GetFilesToUpload found {0}", uploads.Count);
 
-            return localFiles.ConvertAll(f => new UploadItem { FilePath = f });
+            return uploads;
         }
 
         public string LocalDirectory;
