@@ -85,8 +85,13 @@ namespace nopBackup
         {
             get { return this["Name"] as string; }
         }
+        [ConfigurationProperty("FullBackupFrequency", DefaultValue = 1)]
+        public int FullBackupFrequency
+        {
+            get { return (int)this["FullBackupFrequency"]; }
+        }
     }
-
+    
     public class DirectoryBackup : BackupTarget
     {
         [ConfigurationProperty("Path", IsRequired = true)]

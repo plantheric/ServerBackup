@@ -31,7 +31,8 @@ namespace nopBackup
                 {
                     ServerName = database.Server,
                     DatabaseName = database.Name,
-                    FullKeyPrefix = config.FullKeyPrefix(database.KeyPrefix)
+                    FullKeyPrefix = config.FullKeyPrefix(database.KeyPrefix),
+                    FullBackupFrequency = database.FullBackupFrequency
                 };
                 files.Add(new UploadSet(backup.MakeBackupFile(), database.KeyPrefix, database.Lifetime));
             }

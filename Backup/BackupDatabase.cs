@@ -50,6 +50,7 @@ namespace nopBackup
 
                 var metadata = new NameValueCollection();
                 metadata.Add("BackupType", backup.Incremental ? "Differential" : "Full");
+
                 uploads.Add(new UploadItem { FilePath = FilePath, Metadata = metadata });
             }
             catch (Exception e)
@@ -68,7 +69,7 @@ namespace nopBackup
             List<S3Object> s3Objects = s3Interface.ObjectsFromKey(FullKeyPrefix);
 
             s3Objects.Sort((a, b) => DateTime.Parse(a.LastModified).CompareTo(DateTime.Parse(b.LastModified)));
-            s3Objects = s3Objects.GetRange(s3Objects.Count - FullBackupPeriod, FullBackupPeriod);
+            s3Objects = s3Objects.GetRange(s3Objects.Count - FullBackupFrequency, FullBackupFrequency);
 
             var metadata = s3Interface.GetObjectMetadata(s3Objects);
 
@@ -87,9 +88,9 @@ namespace nopBackup
         public string DatabaseName;
         public string ServerName;
         public string FullKeyPrefix;
-        public int FullBackupPeriod = 2;
+        public int FullBackupFrequency = 1;
 
-        private string FilePath { get; set; }
+        private string FilePath;
         private static readonly ILog log = LogManager.GetLogger(typeof(BackupDatabase));
     }
 }
