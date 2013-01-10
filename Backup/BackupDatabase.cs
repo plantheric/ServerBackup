@@ -21,6 +21,8 @@ namespace nopBackup
 
         public List<UploadItem> MakeBackupFile()
         {
+            var uploads = new List<UploadItem>();
+
             try
             {
                 log.InfoFormat("Start backup of {0}", DatabaseName);
@@ -45,6 +47,10 @@ namespace nopBackup
                 string zipFilePath = Utilities.MakeZipFile(FilePath);
                 File.Delete(FilePath);
                 FilePath = zipFilePath;
+
+                var metadata = new NameValueCollection();
+                metadata.Add("BackupType", backup.Incremental ? "Differential" : "Full");
+                uploads.Add(new UploadItem { FilePath = FilePath, Metadata = metadata });
             }
             catch (Exception e)
             {
@@ -53,7 +59,7 @@ namespace nopBackup
 
             log.Info("End backup");
 
-            return new List<UploadItem> { new UploadItem { FilePath = FilePath } };
+            return uploads;
         }
 
         private bool IsIncrementalBackup()
@@ -61,12 +67,13 @@ namespace nopBackup
             var s3Interface = new S3Interface();
             List<S3Object> s3Objects = s3Interface.ObjectsFromKey(FullKeyPrefix);
 
-            s3Objects.Sort((a, b) => a.LastModified.CompareTo(b.LastModified));
+            s3Objects.Sort((a, b) => DateTime.Parse(a.LastModified).CompareTo(DateTime.Parse(b.LastModified)));
             s3Objects = s3Objects.GetRange(s3Objects.Count - FullBackupPeriod, FullBackupPeriod);
 
             var metadata = s3Interface.GetObjectMetadata(s3Objects);
 
-            return true;
+            bool recentFull = metadata.Exists(md => md.Get("x-amz-meta-backuptype") == "Full");
+            return recentFull;
         }
 
         static void backup_Complete(object sender, ServerMessageEventArgs e)

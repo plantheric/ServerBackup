@@ -50,7 +50,9 @@ namespace nopBackup
                     foreach (var file in upload.Items)
                     {
                         string fileKey = fullPrefix + @"/" + Path.GetFileName(file.FilePath);
-                        tranferUtility.Upload(file.FilePath, AWSBucket, fileKey);
+                        var request = new TransferUtilityUploadRequest { FilePath = file.FilePath, BucketName = AWSBucket, Key = fileKey };
+                        request.WithMetadata(file.Metadata);
+                        tranferUtility.Upload(request);
 
                         log.InfoFormat("Uploaded {0}", fileKey);
                     }
