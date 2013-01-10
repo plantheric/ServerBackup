@@ -19,12 +19,15 @@ namespace nopBackup
             {
                 log.InfoFormat("Start GetFilesToUpload for {0}", LocalDirectory);
 
-                var localNames = new List<string>(Directory.GetFiles(LocalDirectory)).ConvertAll(f => Path.GetFileName(f));
-
                 var s3Objects = new S3Interface().ObjectsFromKey(FullKeyPrefix);
-                var remoteNames = s3Objects.ConvertAll(f => f.Key.Substring(FullKeyPrefix.Length));
+                var localPaths = Directory.GetFiles(LocalDirectory);
 
-                var newNames = new List<string>(localNames.Except(remoteNames));
+                //  Make Dictionaries with the file name and mod date for the local and remote lists
+                var remotes = s3Objects.ToDictionary(o => o.Key.Substring(FullKeyPrefix.Length), o => DateTime.Parse(o.LastModified));
+                var locals = localPaths.ToDictionary(p => Path.GetFileName(p), p => File.GetLastWriteTimeUtc(p));
+
+                //  Make list of file names that only local or newer on local
+                var newNames = locals.Where(l => !remotes.ContainsKey(l.Key) || remotes[l.Key] < l.Value).Select(p => p.Key).ToList();
 
                 uploads = newNames.ConvertAll(fn => new UploadItem { FilePath = Path.Combine(LocalDirectory, fn) });
             }
