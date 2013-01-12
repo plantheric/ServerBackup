@@ -70,9 +70,10 @@ namespace nopBackup
             var s3Interface = new S3Interface();
             List<S3Object> s3Objects = s3Interface.ObjectsFromKey(FullKeyPrefix);
 
+            int allowedDifferentials = Math.Max(FullBackupFrequency - 1, 0);
             s3Objects.Sort((a, b) => DateTime.Parse(a.LastModified).CompareTo(DateTime.Parse(b.LastModified)));
-            if (s3Objects.Count > FullBackupFrequency)
-                s3Objects = s3Objects.GetRange(s3Objects.Count - FullBackupFrequency, FullBackupFrequency);
+            if (s3Objects.Count > allowedDifferentials)
+                s3Objects = s3Objects.GetRange(s3Objects.Count - allowedDifferentials, allowedDifferentials);
 
             List<NameValueCollection> metadata = s3Interface.GetObjectMetadata(s3Objects);
 
