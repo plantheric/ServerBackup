@@ -42,7 +42,8 @@ namespace nopBackup
                 var archiveFiles = new ArchiveFiles
                 {
                     LocalDirectory = directory.Path,
-                    FullKeyPrefix = config.FullKeyPrefix(directory.KeyPrefix)
+                    FullKeyPrefix = config.FullKeyPrefix(directory.KeyPrefix),
+                    BackupLifetime = directory.Lifetime
                 };
                 files.Add(new UploadSet(archiveFiles.GetFilesToUpload(), directory.KeyPrefix, directory.Lifetime));
             }

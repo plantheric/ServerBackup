@@ -29,8 +29,14 @@ namespace nopBackup
                 locals.ForEach(f => log.DebugFormat("Local , {0} : {1}", f.Key, f.Value));
                 remotes.ForEach(f => log.DebugFormat("Remote, {0} : {1}", f.Key, f.Value));
 
+                var startDate = DateTime.Now.AddDays(-BackupLifetime);
+
                 //  Make list of file names that only local or newer on local
-                var newNames = locals.Where(l => !remotes.ContainsKey(l.Key) || remotes[l.Key] < l.Value).Select(p => p.Key).ToList();
+                var newNames = locals.Where(l =>                                                        //  Upload file when:-
+                                            (!remotes.ContainsKey(l.Key) && l.Value > startDate) ||     //  File not on remote and not old enough to be purged
+                                            (remotes.ContainsKey(l.Key) && l.Value > remotes[l.Key])).  //  File on remote but newer version on local
+
+                                            Select(p => p.Key).ToList();                                //  convert to list of file names
 
                 uploads = newNames.ConvertAll(fn => new UploadItem { FilePath = Path.Combine(LocalDirectory, fn) });
             }
@@ -46,6 +52,7 @@ namespace nopBackup
 
         public string LocalDirectory;
         public string FullKeyPrefix;
+        public int BackupLifetime;
 
         private static readonly ILog log = LogManager.GetLogger(typeof(ArchiveFiles));
     }
