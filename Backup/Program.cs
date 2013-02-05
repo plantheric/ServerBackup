@@ -55,7 +55,11 @@ namespace nopBackup
                 KeyPrefix = config.KeyPrefix
             };
 
-            upload.TransferFiles(files);
+            if (config.NoUpload == false)
+                upload.TransferFiles(files);
+            else
+                log.Info("UPLOAD DISABLED");
+
             log.Info("End");
         }
     }

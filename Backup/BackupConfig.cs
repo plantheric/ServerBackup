@@ -34,6 +34,12 @@ namespace nopBackup
             get { return this["KeyPrefix"] as string; }
         }
 
+        [ConfigurationProperty("NoUpload", DefaultValue=false)]
+        public bool NoUpload
+        {
+            get { return (bool)this["NoUpload"]; }
+        }
+
         [ConfigurationProperty("Databases")]
         [ConfigurationCollection(typeof(ConfigCollection<DatabaseBackup>), AddItemName = "Database")]
         public ConfigCollection<DatabaseBackup> Databases

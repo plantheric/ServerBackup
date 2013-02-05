@@ -26,6 +26,9 @@ namespace nopBackup
                 var remotes = s3Objects.ToDictionary(o => o.Key.Substring(FullKeyPrefix.Length), o => DateTime.Parse(o.LastModified));
                 var locals = localPaths.ToDictionary(p => Path.GetFileName(p), p => File.GetLastWriteTimeUtc(p));
 
+                locals.ForEach(f => log.DebugFormat("Local , {0} : {1}", f.Key, f.Value));
+                remotes.ForEach(f => log.DebugFormat("Remote, {0} : {1}", f.Key, f.Value));
+
                 //  Make list of file names that only local or newer on local
                 var newNames = locals.Where(l => !remotes.ContainsKey(l.Key) || remotes[l.Key] < l.Value).Select(p => p.Key).ToList();
 
