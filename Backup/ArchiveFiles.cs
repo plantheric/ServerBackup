@@ -29,7 +29,7 @@ namespace nopBackup
                 locals.ForEach(f => log.DebugFormat("Local , {0} : {1}", f.Key, f.Value));
                 remotes.ForEach(f => log.DebugFormat("Remote, {0} : {1}", f.Key, f.Value));
 
-                var startDate = DateTime.Now.AddDays(-BackupLifetime);
+                var startDate = BackupLifetime == int.MaxValue ? DateTime.MinValue : DateTime.Now.AddDays(-BackupLifetime);
 
                 //  Make list of file names that only local or newer on local
                 var newNames = locals.Where(l =>                                                        //  Upload file when:-
