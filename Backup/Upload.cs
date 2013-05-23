@@ -21,15 +21,17 @@ namespace nopBackup
 
     class UploadSet
     {
-        public UploadSet(List<UploadItem> items, string keyPrefix, int lifetime)
+        public UploadSet(List<UploadItem> items, string keyPrefix, int lifetime, bool deleteAfterUpload)
         {
             Items = items;
             KeyPrefix = keyPrefix;
             Lifetime = lifetime;
+            DeleteAfterUpload = deleteAfterUpload;
         }
         public List<UploadItem> Items;
         public string KeyPrefix;
         public int Lifetime;
+        public bool DeleteAfterUpload;
     }
 
     class Upload
@@ -56,6 +58,8 @@ namespace nopBackup
                         tranferUtility.Upload(request);
 
                         log.InfoFormat("Uploaded {0}", fileKey);
+                        if (upload.DeleteAfterUpload)
+                            File.Delete(file.FilePath);
                     }
 
                     LifecycleConfiguration.Rules.RemoveAll(rule => rule.Prefix == fullPrefix);

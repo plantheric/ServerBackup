@@ -14,7 +14,6 @@ namespace nopBackup
 {
     class Program
     {
-        private static readonly ILog log = LogManager.GetLogger(typeof(Program));
         static void Main(string[] args)
         {
             XmlConfigurator.Configure();
@@ -34,7 +33,7 @@ namespace nopBackup
                     FullKeyPrefix = config.FullKeyPrefix(database.KeyPrefix),
                     FullBackupFrequency = database.FullBackupFrequency
                 };
-                files.Add(new UploadSet(backup.MakeBackupFile(), database.KeyPrefix, database.Lifetime));
+                files.Add(new UploadSet(backup.MakeBackupFile(), database.KeyPrefix, database.Lifetime, true));
             }
 
             foreach (DirectoryBackup directory in config.Directories)
@@ -45,7 +44,7 @@ namespace nopBackup
                     FullKeyPrefix = config.FullKeyPrefix(directory.KeyPrefix),
                     BackupLifetime = directory.Lifetime
                 };
-                files.Add(new UploadSet(archiveFiles.GetFilesToUpload(), directory.KeyPrefix, directory.Lifetime));
+                files.Add(new UploadSet(archiveFiles.GetFilesToUpload(), directory.KeyPrefix, directory.Lifetime, false));
             }
 
             var upload = new Upload
@@ -63,6 +62,8 @@ namespace nopBackup
 
             log.Info("End");
         }
+
+        private static readonly ILog log = LogManager.GetLogger(typeof(Program));
     }
 }
 
