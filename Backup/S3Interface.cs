@@ -34,10 +34,17 @@ namespace nopBackup
             {
                 var request = new ListObjectsRequest { BucketName = AWSBucket, Prefix = key, Delimiter = @"/" };
 
-                using (var response = S3Client.ListObjects(request))
+                do
                 {
-                    s3Files = response.S3Objects;
-                }
+                    var response = S3Client.ListObjects(request);
+                    s3Files.AddRange(response.S3Objects);
+
+                    if (response.IsTruncated)
+                        request.Marker = response.NextMarker;
+                    else
+                        request = null;
+
+                } while (request != null);
             }
             catch (Exception e)
             {
