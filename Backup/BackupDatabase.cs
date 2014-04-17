@@ -28,7 +28,8 @@ namespace nopBackup
                 log.InfoFormat("Start backup of {0}", DatabaseName);
 
                 var server = new Server(ServerName);
-                string backupName = string.Format("{0}-Backup-{1}", DatabaseName, DateTime.Now.ToString("ddMMyyy_HHmm"));
+                string backupName = string.Format("{0}-Backup-{1}", DatabaseName, DateTime.Now.ToString("yyyy-MM-ddTHHmmss"));
+                log.InfoFormat("Backup file {0}", backupName);
 
                 FilePath = Path.Combine(Utilities.SystemTempFolder, backupName + ".bak");
 
