@@ -42,7 +42,14 @@ namespace nopBackup
             {
                 log.Info("Start TransferFiles");
 
-                S3Client = AWSClientFactory.CreateAmazonS3Client(AWSAccessKey, AWSSecretKey);
+                AmazonS3Config config = new AmazonS3Config
+                {
+                    RegionEndpoint = RegionEndpoint.GetBySystemName("eu-west-2"),
+                    SignatureMethod = Amazon.Runtime.SigningAlgorithm.HmacSHA256,
+                    SignatureVersion = "4"
+                };
+                S3Client = new AmazonS3Client(AWSAccessKey, AWSSecretKey, config);
+
                 GetLifeCycleConfiguration();
                 var tranferUtility = new TransferUtility(S3Client);
 
@@ -53,8 +60,11 @@ namespace nopBackup
                     {
                         string fileKey = fullPrefix + @"/" + Path.GetFileName(file.FilePath);
                         var request = new TransferUtilityUploadRequest { BucketName = AWSBucket, Key = fileKey };
-                        request.WithMetadata(file.Metadata);
-                        request.WithInputStream (new FileStream(file.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite));
+                        foreach (string key in file.Metadata)
+                        {
+                            request.Metadata.Add(key, file.Metadata[key]);
+                        }
+                        request.InputStream = new FileStream(file.FilePath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
                         tranferUtility.Upload(request);
 
                         log.InfoFormat("Uploaded {0}", fileKey);
@@ -105,7 +115,7 @@ namespace nopBackup
         public string AWSBucket;
         public string KeyPrefix;
 
-        private AmazonS3 S3Client;
+        private AmazonS3Client S3Client;
         private LifecycleConfiguration LifecycleConfiguration;
 
         private static readonly ILog log = LogManager.GetLogger(typeof(Upload));

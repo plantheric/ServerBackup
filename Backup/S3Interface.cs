@@ -23,7 +23,13 @@ namespace nopBackup
 
         public S3Interface()
         {
-            S3Client = AWSClientFactory.CreateAmazonS3Client(AWSAccessKey, AWSSecretKey);
+            AmazonS3Config config = new AmazonS3Config
+            {
+                RegionEndpoint = RegionEndpoint.GetBySystemName("eu-west-2"),
+                SignatureMethod = Amazon.Runtime.SigningAlgorithm.HmacSHA256,
+                SignatureVersion = "4"
+            };
+            S3Client = new AmazonS3Client(AWSAccessKey, AWSSecretKey, config);
         }
 
         public List<S3Object> ObjectsFromKey(string key)
@@ -61,7 +67,12 @@ namespace nopBackup
             {
                 var request = new GetObjectMetadataRequest { BucketName = AWSBucket, Key = s3Object.Key };
                 var response = S3Client.GetObjectMetadata(request);
-                metadata.Add(response.Metadata);
+                var m = new NameValueCollection();
+                foreach (string key in response.Metadata.Keys)
+                {
+                    m.Add(key, response.Metadata[key]);
+                }
+                metadata.Add(m);
             }
 
             return metadata;
@@ -71,7 +82,7 @@ namespace nopBackup
         private static string AWSSecretKey;
         private static string AWSBucket;
 
-        private AmazonS3 S3Client;
+        private AmazonS3Client S3Client;
 
         private static readonly ILog log = LogManager.GetLogger(typeof(S3Interface));
     }

@@ -72,7 +72,7 @@ namespace nopBackup
             List<S3Object> s3Objects = s3Interface.ObjectsFromKey(FullKeyPrefix);
 
             int allowedDifferentials = Math.Max(FullBackupFrequency - 1, 0);
-            s3Objects.Sort((a, b) => DateTime.Parse(a.LastModified).CompareTo(DateTime.Parse(b.LastModified)));
+            s3Objects.Sort((a, b) => a.LastModified.CompareTo(b.LastModified));
             if (s3Objects.Count > allowedDifferentials)
                 s3Objects = s3Objects.GetRange(s3Objects.Count - allowedDifferentials, allowedDifferentials);
 

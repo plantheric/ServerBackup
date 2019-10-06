@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Collections.Specialized;
 using System.Text;
 using System.Threading.Tasks;
 using Amazon;
@@ -23,7 +24,7 @@ namespace nopBackup
                 var localPaths = Directory.GetFiles(LocalDirectory);
 
                 //  Make Dictionaries with the file name and mod date for the local and remote lists
-                var remotes = s3Objects.ToDictionary(o => o.Key.Substring(FullKeyPrefix.Length), o => DateTime.Parse(o.LastModified));
+                var remotes = s3Objects.ToDictionary(o => o.Key.Substring(FullKeyPrefix.Length), o => o.LastModified);
                 var locals = localPaths.ToDictionary(p => Path.GetFileName(p), p => File.GetLastWriteTimeUtc(p));
 
                 locals.ForEach(f => log.DebugFormat("Local , {0} : {1}", f.Key, f.Value));
@@ -38,7 +39,11 @@ namespace nopBackup
 
                                             Select(p => p.Key).ToList();                                //  convert to list of file names
 
-                uploads = newNames.ConvertAll(fn => new UploadItem { FilePath = Path.Combine(LocalDirectory, fn) });
+                uploads = newNames.ConvertAll(fn => new UploadItem
+                {
+                    FilePath = Path.Combine(LocalDirectory, fn),
+                    Metadata = new NameValueCollection()
+                });
             }
             catch (Exception e)
             {
