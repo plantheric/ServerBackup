@@ -79,7 +79,8 @@ namespace nopBackup
                         {
                             Id = string.Format("Auto Purge {0} after {1} days", fullPrefix, upload.Lifetime),
                             Prefix = fullPrefix,
-                            Expiration = new LifecycleRuleExpiration { Days = upload.Lifetime }
+                            Expiration = new LifecycleRuleExpiration { Days = upload.Lifetime },
+                            Status = LifecycleRuleStatus.Enabled
                         });
                     }
                 }
