@@ -20,7 +20,7 @@ namespace nopBackup
             log.Info("Start");
 
             BackupConfig config = BackupConfig.GetConfig();
-            S3Interface.Setup(config.AccessKey, config.SecretKey, config.Bucket);
+            S3Interface.Setup(config.AccessKey, config.SecretKey, config.Region, config.Bucket);
 
             var files = new List<UploadSet>();
 
@@ -49,6 +49,7 @@ namespace nopBackup
 
             var upload = new Upload
             {
+                Region = config.Region,
                 AWSBucket = config.Bucket,
                 AWSAccessKey = config.AccessKey,
                 AWSSecretKey = config.SecretKey,

@@ -44,7 +44,7 @@ namespace nopBackup
 
                 AmazonS3Config config = new AmazonS3Config
                 {
-                    RegionEndpoint = RegionEndpoint.GetBySystemName("eu-west-2"),
+                    RegionEndpoint = RegionEndpoint.GetBySystemName(Region),
                     SignatureMethod = Amazon.Runtime.SigningAlgorithm.HmacSHA256,
                     SignatureVersion = "4"
                 };
@@ -113,6 +113,7 @@ namespace nopBackup
 
         public string AWSAccessKey;
         public string AWSSecretKey;
+        public string Region;
         public string AWSBucket;
         public string KeyPrefix;
 

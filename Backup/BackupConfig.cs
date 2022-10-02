@@ -17,6 +17,12 @@ namespace nopBackup
             get { return this["Bucket"] as string; }
         }
 
+        [ConfigurationProperty("Region", IsRequired = true)]
+        public string Region
+        {
+            get { return this["Region"] as string; }
+        }
+
         [ConfigurationProperty("AccessKey", IsRequired = true)]
         public string AccessKey
         {

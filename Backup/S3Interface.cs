@@ -14,10 +14,11 @@ namespace nopBackup
 {
     class S3Interface
     {
-        public static void Setup(string accessKey, string secretKey, string bucket)
+        public static void Setup(string accessKey, string secretKey, string region, string bucket)
         {
             AWSAccessKey = accessKey;
             AWSSecretKey = secretKey;
+            Region = region;
             AWSBucket = bucket;
         }
 
@@ -25,7 +26,7 @@ namespace nopBackup
         {
             AmazonS3Config config = new AmazonS3Config
             {
-                RegionEndpoint = RegionEndpoint.GetBySystemName("eu-west-2"),
+                RegionEndpoint = RegionEndpoint.GetBySystemName(Region),
                 SignatureMethod = Amazon.Runtime.SigningAlgorithm.HmacSHA256,
                 SignatureVersion = "4"
             };
@@ -80,6 +81,7 @@ namespace nopBackup
 
         private static string AWSAccessKey;
         private static string AWSSecretKey;
+        private static string Region;
         private static string AWSBucket;
 
         private AmazonS3Client S3Client;
